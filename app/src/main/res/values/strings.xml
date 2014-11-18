@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2013 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<resources>
+
+    <string name="app_name">Lenta.ru</string>
+
+    <string-array name="planets_array">
+        <item>Все новости</item>
+        <item>Раздел 1</item>
+        <item>Раздел 2</item>
+        <item>Раздел 3</item>
+        <item>Раздел 4</item>
+        <item>Раздел 5</item>
+        <item>Раздел 6</item>
+        <item>Раздел 7</item>
+        <item>Раздел 8</item>
+    </string-array>
+
+    <string name="one_news_data">date</string>
+    <string name="one_news_title">Название статьи</string>
+    <string name="one_news_category">Категория</string>
+    <string name="one_news_description">Текст статьи, как сюда передать большой обьем текста?</string>
+
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="action_websearch">Настройки</string>
+    <string name="app_not_available">Sorry, there\'s no web browser available</string>
+    <string name="news_title_list">News Title</string>
+    <string name="data_list">data</string>
+    <string name="description_news_list">description news</string>
+    <string name="category">Category</string>
+    <string name="title_activity_one_news">OneNewsActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
