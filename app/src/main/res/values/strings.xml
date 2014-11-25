@@ -34,8 +34,6 @@
     <string name="one_news_title">Название статьи</string>
     <string name="one_news_category">Категория</string>
     <string name="one_news_description">Текст статьи, как сюда передать большой обьем текста?</string>
-
-
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="action_websearch">Настройки</string>
@@ -47,5 +45,8 @@
     <string name="title_activity_one_news">OneNewsActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="first_activity_text">Lenta.ru</string>
+    <string name="connection_error">connection_error</string>
+    <string name="xml_error">xml_error</string>
 
 </resources>

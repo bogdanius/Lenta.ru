@@ -8,21 +8,19 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.stolyarov.bogdan.lentaru.R;
-import com.stolyarov.bogdan.lentaru.model.NewsListModel;
-import com.stolyarov.bogdan.lentaru.model.NewsModel;
+import com.stolyarov.bogdan.lentaru.model.Item;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Created by Bagi on 11.11.2014.
  */
-public class NewsListAdapter extends BaseAdapter {
+public class ItemAdapter extends BaseAdapter {
 
 
     private final Activity context;
 
-    private static ArrayList<NewsListModel> listNews;
+    private static ArrayList<Item> items;
 
     static class ViewHolder {
         public TextView title;
@@ -49,18 +47,18 @@ public class NewsListAdapter extends BaseAdapter {
         } else {
             viewHolder = (ViewHolder) newsView.getTag();
         }
-        if (listNews != null) {
-            NewsListModel newsListModel = listNews.get(i);
-            viewHolder.title.setText(newsListModel.getTitle());
-            viewHolder.category.setText(newsListModel.getCategory());
-            viewHolder.publicDate.setText(newsListModel.getPublicDate());
+        if (items != null) {
+            Item item = items.get(i);
+            viewHolder.title.setText(item.getTitle());
+            viewHolder.category.setText(item.getCategory());
+            viewHolder.publicDate.setText(item.getPubDate());
         }
         return newsView;
     }
 
     @Override
     public int getCount() {
-        return listNews.size();
+        return items.size();
 
     }
 
@@ -74,8 +72,8 @@ public class NewsListAdapter extends BaseAdapter {
         return 0;
     }
 
-    public NewsListAdapter(Activity context, ArrayList<NewsListModel> newsListModels) {
-        listNews = newsListModels;
+    public ItemAdapter(Activity context, ArrayList<Item> items) {
+        this.items = items;
         this.context = context;
     }
 }

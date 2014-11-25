@@ -10,16 +10,19 @@
         <activity
             android:name=".ui.MainActivity"
             android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name=".ui.FirstActivity"
+            android:label="@string/app_name"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/FullscreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.OneNewsActivity"
-            android:label="@string/title_activity_one_news" >
-        </activity>
+        <uses-permission android:name="android.permission.INTERNET" />
+
     </application>
 
 </manifest>

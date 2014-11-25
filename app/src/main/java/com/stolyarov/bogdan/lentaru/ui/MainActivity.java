@@ -16,13 +16,8 @@
 
 package com.stolyarov.bogdan.lentaru.ui;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Locale;
-
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -30,7 +25,6 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,9 +37,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.stolyarov.bogdan.lentaru.AsyncTasks.DownloadXmlTask;
 import com.stolyarov.bogdan.lentaru.R;
-import com.stolyarov.bogdan.lentaru.adapter.NewsListAdapter;
-import com.stolyarov.bogdan.lentaru.model.NewsListModel;
+import com.stolyarov.bogdan.lentaru.adapter.ItemAdapter;
+import com.stolyarov.bogdan.lentaru.model.Item;
+
+import java.util.ArrayList;
+import java.util.Locale;
 
 /**
  * This example illustrates a common usage of the DrawerLayout widget
@@ -84,7 +82,19 @@ public class MainActivity extends Activity {
     private CharSequence mTitle;
     private String[] mPlanetTitles;
 
-    ArrayList<NewsListModel> newsListModels = new ArrayList<NewsListModel>();
+    public static final String WIFI = "Wi-Fi";
+    public static final String ANY = "Any";
+    private static final String URL = "http://lenta.ru/rss/";
+
+
+    // Whether there is a Wi-Fi connection.
+    private static boolean wifiConnected = false;
+    // Whether there is a mobile connection.
+    private static boolean mobileConnected = false;
+    // Whether the display should be refreshed.
+    public static boolean refreshDisplay = true;
+    public static String sPref = null;
+    private static ArrayList<Item> items;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,17 +107,13 @@ public class MainActivity extends Activity {
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         newsList = (ListView) findViewById(R.id.news_list);
 
+        loadNews();
         //create and set Adapter to news list
-        String currentDateTimeString = (String) DateFormat.format("yyyy-MM-dd kk:mm",new Date());
-        NewsListAdapter newsListAdapter = new NewsListAdapter(this, newsListModels);
-        for (int i = 0; i < 50; i++) {
-            NewsListModel newsListModel =  new NewsListModel();
-            newsListModel.setTitle("Название пусть будет тоже не самое маленькое " + i);
-            newsListModel.setCategory("Новости");
-            newsListModel.setPublicDate(currentDateTimeString);
-            newsListModels.add(newsListModel);
-        }
-        newsList.setAdapter(newsListAdapter);
+//        String currentDateTimeString = (String) DateFormat.format("yyyy-MM-dd kk:mm", new Date());
+
+        ItemAdapter itemAdapter = new ItemAdapter(this, items);
+
+        newsList.setAdapter(itemAdapter);
 
 
         // set a custom shadow that overlays the main content when the drawer opens
@@ -147,10 +153,31 @@ public class MainActivity extends Activity {
         }
 
 
-
-
-
     }
+
+    // Uses AsyncTask to download the XML feed from lenta.ru
+    public void loadNews() {
+
+        DownloadXmlTask downloadXmlTask = new DownloadXmlTask();
+
+//        if ((sPref.equals(ANY)) && (wifiConnected || mobileConnected)) {
+            downloadXmlTask.setContext(this);
+            downloadXmlTask.execute(URL);
+//        } else if ((sPref.equals(WIFI)) && (wifiConnected)) {
+//            downloadXmlTask.setContext(this);
+//            downloadXmlTask.execute(URL);
+//        } else {
+//            // show error
+//        }
+    }
+
+    public static  void setItems(ArrayList<Item> items){
+        MainActivity.items = items;
+    }
+
+
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -176,7 +203,7 @@ public class MainActivity extends Activity {
             return true;
         }
         // Handle action buttons
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.action_websearch:
                 // create intent to perform web search for this planet
                 Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
@@ -266,4 +293,6 @@ public class MainActivity extends Activity {
             return rootView;
         }
     }
+
+
 }
