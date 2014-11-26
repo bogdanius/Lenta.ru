@@ -34,7 +34,8 @@ public class LentaRuXmlParser {
     private ArrayList<Item> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
         ArrayList<Item> items = new ArrayList<Item>();
 
-        parser.require(XmlPullParser.START_TAG, ns, "feed");
+        parser.require(XmlPullParser.START_TAG, ns, "rss");
+//        parser.next();  // this doing for skip tag "chanel" 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -52,7 +53,7 @@ public class LentaRuXmlParser {
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
 // to their respective "read" methods for processing. Otherwise, skips the tag.
     private Item readItem(XmlPullParser parser) throws XmlPullParserException, IOException {
-        parser.require(XmlPullParser.START_TAG, LentaRuXmlParser.ns, "entry");
+        parser.require(XmlPullParser.START_TAG, LentaRuXmlParser.ns, "item");
         String title = null;
         String pubDate = null;
         String link = null;
