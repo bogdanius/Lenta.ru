@@ -2,6 +2,7 @@ package com.stolyarov.bogdan.lentaru.AsyncTasks;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.View;
 
 import com.stolyarov.bogdan.lentaru.model.Item;
@@ -24,6 +25,7 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
     private final OnNewsLoadedComplete listener;
     private Context context;
     private ArrayList<Item> resultItems;
+    public static final String myLog = "MyLog";
 
     public DownloadXmlTask(Context c, View v, OnNewsLoadedComplete l) {
         this.context = c;
@@ -34,13 +36,17 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
     @Override
     protected ArrayList<Item> doInBackground(String... urls) {
         resultItems = new ArrayList<Item>();
+        Log.d(myLog,"doInBackground");
 
         try {
+            Log.d(myLog, "получение resultItems ");
             resultItems = loadXmlFromNetwork(urls[0]);
+            Log.d(myLog,"resultItems получен");
         } catch (XmlPullParserException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+
         }
 
         return resultItems;
@@ -52,16 +58,16 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
             progres.setVisibility(View.GONE);
         }
         if(listener != null) {
-            listener.onNewsLoaded(items);
+            listener.onNewsLoaded(resultItems);
         }
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        if(progres != null) {
+/*        if(progres != null) {
             progres.setVisibility(View.VISIBLE);
-        }
+        }*/
     }
 
     private ArrayList<Item> loadXmlFromNetwork(String urlString) throws XmlPullParserException, IOException {
@@ -88,6 +94,8 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
         return items;
     }
 
+
+
     // Given a string representation of a URL, sets up a connection and gets
 // an input stream.
     private InputStream downloadUrl(String urlString) throws IOException {
@@ -99,6 +107,7 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
         conn.setDoInput(true);
         // Starts the query
         conn.connect();
+        Log.d(myLog, "downloadUrl");
         return conn.getInputStream();
     }
 

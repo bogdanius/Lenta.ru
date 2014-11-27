@@ -1,5 +1,6 @@
 package com.stolyarov.bogdan.lentaru.parser;
 
+import android.util.Log;
 import android.util.Xml;
 
 import com.stolyarov.bogdan.lentaru.model.Item;
@@ -18,6 +19,7 @@ public class LentaRuXmlParser {
 
     // We don't use namespaces
     public static final String ns = null;
+    public static final String myLog = "MyLog";
 
     public ArrayList<Item> parse(InputStream in) throws XmlPullParserException, IOException {
         try {
@@ -29,26 +31,43 @@ public class LentaRuXmlParser {
         } finally {
             in.close();
         }
+
     }
 
     private ArrayList<Item> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
         ArrayList<Item> items = new ArrayList<Item>();
-
         parser.require(XmlPullParser.START_TAG, ns, "rss");
-//        parser.next();  // this doing for skip tag "chanel" 
+        parser.next();  // this doing for skip tag "chanel"
         while (parser.next() != XmlPullParser.END_TAG) {
+
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
             String name = parser.getName();
+
             // Starts by looking for the item tag
-            if (name.equals("item")) {
-                items.add(readItem(parser));
+            if (name.equals("channel")) {
+                parser.require(XmlPullParser.START_TAG, ns, "channel");
+                while (parser.next() != XmlPullParser.END_TAG) {
+                    if (parser.getEventType() != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+
+                    name = parser.getName();
+                    if (name.equals("item")) {
+                        items.add(readItem(parser));
+                    } else {
+                        skip(parser);
+                    }
+                }
             } else {
                 skip(parser);
             }
+
         }
+        Log.d(myLog, "return items from readFeed");
         return items;
+
     }
     // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
 // to their respective "read" methods for processing. Otherwise, skips the tag.
@@ -94,16 +113,9 @@ public class LentaRuXmlParser {
 
     // Processes link tags in the feed.
     private String readLink(XmlPullParser parser) throws IOException, XmlPullParserException {
-        String link = "";
+
         parser.require(XmlPullParser.START_TAG, LentaRuXmlParser.ns, "link");
-        String tag = parser.getName();
-        String relType = parser.getAttributeValue(null, "rel");
-        if (tag.equals("link")) {
-            if (relType.equals("alternate")){
-                link = parser.getAttributeValue(null, "href");
-                parser.nextTag();
-            }
-        }
+        String link = readText(parser);
         parser.require(XmlPullParser.END_TAG, LentaRuXmlParser.ns, "link");
         return link;
     }
