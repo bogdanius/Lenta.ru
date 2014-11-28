@@ -63,10 +63,8 @@ public class ItemAdapter extends BaseAdapter {
     @Override
     public int getCount() {
         int count  = 0;
-        Log.d(myLog, "items.size in adapter = 0");
         if(items != null) {
             count = items.size();
-            Log.d(myLog, "items.size != 0");
         }
         return count;
 

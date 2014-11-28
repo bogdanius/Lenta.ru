@@ -18,16 +18,20 @@
 
     <string name="app_name">Lenta.ru</string>
 
-    <string-array name="planets_array">
+    <string-array name="rubrics_array">
         <item>Все новости</item>
-        <item>Раздел 1</item>
-        <item>Раздел 2</item>
-        <item>Раздел 3</item>
-        <item>Раздел 4</item>
-        <item>Раздел 5</item>
-        <item>Раздел 6</item>
-        <item>Раздел 7</item>
-        <item>Раздел 8</item>
+        <item>Россия</item>
+        <item>Мир</item>
+        <item>Бывший СССР</item>
+        <item>Экономика</item>
+        <item>Силовые структуры</item>
+        <item>Наука и техника</item>
+        <item>Оружие</item>
+        <item>Спорт</item>
+        <item>Культура</item>
+        <item>Интернет и СМИ</item>
+        <item>Из жизни</item>
+
     </string-array>
 
     <string name="one_news_data">date</string>

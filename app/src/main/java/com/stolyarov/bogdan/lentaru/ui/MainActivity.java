@@ -16,13 +16,18 @@
 
 package com.stolyarov.bogdan.lentaru.ui;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
@@ -41,14 +46,13 @@ import com.stolyarov.bogdan.lentaru.AsyncTasks.DownloadXmlTask;
 import com.stolyarov.bogdan.lentaru.AsyncTasks.OnNewsLoadedComplete;
 import com.stolyarov.bogdan.lentaru.R;
 import com.stolyarov.bogdan.lentaru.adapter.ItemAdapter;
+import com.stolyarov.bogdan.lentaru.fragments.FragmentOneNewsMobile;
 import com.stolyarov.bogdan.lentaru.model.Item;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
-public class MainActivity extends Activity {
-
-
+public class MainActivity extends FragmentActivity {
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -57,13 +61,20 @@ public class MainActivity extends Activity {
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
-    private String[] mPlanetTitles;
+    private String[] rubricsTitles;
 
     private static final String URL = "http://lenta.ru/rss/";
     public static final String myLog = "MyLog";
 
+    private static boolean wifiConnected = false;
+    private static boolean mobileConnected = false;
+    private static boolean isConnect = false;
 
     public static ArrayList<Item> items;
+    FragmentManager fragmentManager;
+    FragmentTransaction fragmentTransaction;
+    FragmentOneNewsMobile fragmentOneNewsMobile = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,17 +82,61 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         initNavigationDrawerViews();
         initViews();
+        updateConnectedFlags();
+
+        newsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View itemClicked, int position, long id) {
+
+
+                fragmentManager = getSupportFragmentManager();
+                fragmentOneNewsMobile.setItem(items.get(position));
+                fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.add(R.id.container,fragmentOneNewsMobile);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        loadNews();
+
+        if (isConnect){
+            loadNews();
+            Toast.makeText(getApplicationContext(),"Internet connect established",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(),"Check internet connection",Toast.LENGTH_LONG).show();
+        }
     }
 
     private void initViews() {
         newsList = (ListView) findViewById(R.id.news_list);
+        fragmentOneNewsMobile = new FragmentOneNewsMobile();
+
     }
+
+    // Checks the network connection
+    private void updateConnectedFlags() {
+        ConnectivityManager connectivityManager  =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeInfo = connectivityManager.getActiveNetworkInfo();
+        if (activeInfo != null && activeInfo.isConnected()) {
+            wifiConnected = activeInfo.getType() == ConnectivityManager.TYPE_WIFI;
+            mobileConnected = activeInfo.getType() == ConnectivityManager.TYPE_MOBILE;
+            isConnect = true;
+
+        } else {
+            wifiConnected = false;
+            mobileConnected = false;
+            isConnect = false;
+        }
+    }
+
+
 
     // Uses AsyncTask to download the XML feed from lenta.ru
     public void loadNews() {
@@ -89,6 +144,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onNewsLoaded(ArrayList<Item> result) {
+                items = result;
                 ItemAdapter adapter = new ItemAdapter(MainActivity.this, result);
                 newsList.setAdapter(adapter);
             }
@@ -100,7 +156,7 @@ public class MainActivity extends Activity {
     // from NavigationDrawer
     private void initNavigationDrawerViews(){
         mTitle = mDrawerTitle = getTitle();
-        mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+        rubricsTitles = getResources().getStringArray(R.array.rubrics_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
@@ -108,7 +164,7 @@ public class MainActivity extends Activity {
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
         mDrawerList.setAdapter(new ArrayAdapter<String>(this,
-                R.layout.drawer_list_item, mPlanetTitles));
+                R.layout.drawer_list_item, rubricsTitles));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         // enable ActionBar app icon to behave as action to toggle nav drawer
@@ -137,10 +193,6 @@ public class MainActivity extends Activity {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
     }
-
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -203,7 +255,7 @@ public class MainActivity extends Activity {
 
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);
-        setTitle(mPlanetTitles[position]);
+        setTitle(rubricsTitles[position]);
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
@@ -236,7 +288,7 @@ public class MainActivity extends Activity {
      * Fragment that appears in the "content_frame", shows a planet
      */
     public static class PlanetFragment extends Fragment {
-        public static final String ARG_PLANET_NUMBER = "planet_number";
+        public static final String ARG_PLANET_NUMBER = "rubrics_array";
 
         public PlanetFragment() {
             // Empty constructor required for fragment subclasses
@@ -247,7 +299,7 @@ public class MainActivity extends Activity {
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_planet, container, false);
             int i = getArguments().getInt(ARG_PLANET_NUMBER);
-            String planet = getResources().getStringArray(R.array.planets_array)[i];
+            String planet = getResources().getStringArray(R.array.rubrics_array)[i];
 
             int imageId = getResources().getIdentifier(planet.toLowerCase(Locale.getDefault()),
                     "drawable", getActivity().getPackageName());
