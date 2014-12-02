@@ -31,7 +31,6 @@ public class LentaRuXmlParser {
         } finally {
             in.close();
         }
-
     }
 
     private ArrayList<Item> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -39,7 +38,6 @@ public class LentaRuXmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "rss");
         parser.next();  // this doing for skip tag "chanel"
         while (parser.next() != XmlPullParser.END_TAG) {
-
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
             }
@@ -69,8 +67,7 @@ public class LentaRuXmlParser {
         return items;
 
     }
-    // Parses the contents of an entry. If it encounters a title, summary, or link tag, hands them off
-// to their respective "read" methods for processing. Otherwise, skips the tag.
+
     private Item readItem(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, LentaRuXmlParser.ns, "item");
         String title = null;
@@ -78,6 +75,7 @@ public class LentaRuXmlParser {
         String link = null;
         String description = null;
         String category = null;
+        String imageUrl = null;
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -96,11 +94,14 @@ public class LentaRuXmlParser {
             else if (name.equals("category")) {
                 category = readCategory(parser);
             }
+            else if (name.equals("enclosure")) {
+                imageUrl = readImageUrl(parser);
+            }
             else {
                 skip(parser);
             }
         }
-        return new Item(title, pubDate, link, description, category);
+        return new Item(title, pubDate, link, description, category, imageUrl);
     }
 
     // Processes title tags in the feed.
@@ -154,6 +155,18 @@ public class LentaRuXmlParser {
         return result;
     }
 
+    // Processes link tags in the feed.
+    private String readImageUrl(XmlPullParser parser) throws IOException, XmlPullParserException {
+        String imageUrl = "";
+        parser.require(XmlPullParser.START_TAG, ns, "enclosure");
+        String tag = parser.getName();
+        if (tag.equals("enclosure")) {
+            imageUrl = parser.getAttributeValue(null, "url");
+                parser.nextTag();
+        }
+        parser.require(XmlPullParser.END_TAG, ns, "enclosure");
+        return imageUrl;
+    }
 
     private void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
         if (parser.getEventType() != XmlPullParser.START_TAG) {

@@ -1,4 +1,4 @@
-package com.stolyarov.bogdan.lentaru.AsyncTasks;
+package com.stolyarov.bogdan.lentaru.asynctasks;
 
 import com.stolyarov.bogdan.lentaru.model.Item;
 

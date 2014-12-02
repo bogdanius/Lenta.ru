@@ -16,7 +16,6 @@
 
 package com.stolyarov.bogdan.lentaru.ui;
 
-import android.app.Fragment;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -30,27 +29,25 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.stolyarov.bogdan.lentaru.AsyncTasks.DownloadXmlTask;
-import com.stolyarov.bogdan.lentaru.AsyncTasks.OnNewsLoadedComplete;
 import com.stolyarov.bogdan.lentaru.R;
 import com.stolyarov.bogdan.lentaru.adapter.ItemAdapter;
+import com.stolyarov.bogdan.lentaru.asynctasks.DownloadXmlTask;
+import com.stolyarov.bogdan.lentaru.asynctasks.OnNewsLoadedComplete;
 import com.stolyarov.bogdan.lentaru.fragments.FragmentOneNewsMobile;
+import com.stolyarov.bogdan.lentaru.fragments.FragmentWithCategorySelected;
 import com.stolyarov.bogdan.lentaru.model.Item;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class MainActivity extends FragmentActivity {
 
@@ -63,18 +60,14 @@ public class MainActivity extends FragmentActivity {
     private CharSequence mTitle;
     private String[] rubricsTitles;
 
-    private static final String URL = "http://lenta.ru/rss/";
     public static final String myLog = "MyLog";
 
-    private static boolean wifiConnected = false;
-    private static boolean mobileConnected = false;
     private static boolean isConnect = false;
 
     public static ArrayList<Item> items;
-    FragmentManager fragmentManager;
-    FragmentTransaction fragmentTransaction;
-    FragmentOneNewsMobile fragmentOneNewsMobile = null;
-
+    private FragmentManager fragmentManager;
+    private FragmentTransaction fragmentTransaction;
+    private FragmentOneNewsMobile fragmentOneNewsMobile = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,60 +75,53 @@ public class MainActivity extends FragmentActivity {
         setContentView(R.layout.activity_main);
         initNavigationDrawerViews();
         initViews();
-        updateConnectedFlags();
 
+        updateConnectedFlags();
         newsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View itemClicked, int position, long id) {
-
-
                 fragmentManager = getSupportFragmentManager();
                 fragmentOneNewsMobile.setItem(items.get(position));
                 fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.add(R.id.container,fragmentOneNewsMobile);
+                fragmentTransaction.add(R.id.container, fragmentOneNewsMobile);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
             }
         });
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (isConnect){
+        if (isConnect) {
             loadNews();
-            Toast.makeText(getApplicationContext(),"Internet connect established",Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(),"Check internet connection",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), "Check internet connection", Toast.LENGTH_LONG).show();
         }
     }
 
     private void initViews() {
         newsList = (ListView) findViewById(R.id.news_list);
         fragmentOneNewsMobile = new FragmentOneNewsMobile();
+    }
 
+    private void initViewsWithCategorySelected() {
+        newsList = (ListView) findViewById(R.id.news_list_with_category_selected);
+        fragmentOneNewsMobile = new FragmentOneNewsMobile();
     }
 
     // Checks the network connection
     private void updateConnectedFlags() {
-        ConnectivityManager connectivityManager  =
+        ConnectivityManager connectivityManager =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeInfo = connectivityManager.getActiveNetworkInfo();
         if (activeInfo != null && activeInfo.isConnected()) {
-            wifiConnected = activeInfo.getType() == ConnectivityManager.TYPE_WIFI;
-            mobileConnected = activeInfo.getType() == ConnectivityManager.TYPE_MOBILE;
             isConnect = true;
-
         } else {
-            wifiConnected = false;
-            mobileConnected = false;
             isConnect = false;
         }
     }
-
 
 
     // Uses AsyncTask to download the XML feed from lenta.ru
@@ -148,13 +134,28 @@ public class MainActivity extends FragmentActivity {
                 ItemAdapter adapter = new ItemAdapter(MainActivity.this, result);
                 newsList.setAdapter(adapter);
             }
-        }).execute(URL);
+        }).execute();
 
     }
 
-
     // from NavigationDrawer
-    private void initNavigationDrawerViews(){
+    // update the main content by replacing fragments
+    private void selectItem(int position) {
+
+        FragmentWithCategorySelected fragmentWithCategorySelected = new FragmentWithCategorySelected();
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentWithCategorySelected.setItems(items);
+        fragmentWithCategorySelected.setCategory(rubricsTitles[position]);
+        fragmentManager.beginTransaction().add(R.id.container, fragmentWithCategorySelected).commit();
+
+        // update selected item and title, then close the drawer
+        mDrawerList.setItemChecked(position, true);
+        setTitle(rubricsTitles[position]);
+        mDrawerLayout.closeDrawer(mDrawerList);
+    }
+
+    private void initNavigationDrawerViews() {
         mTitle = mDrawerTitle = getTitle();
         rubricsTitles = getResources().getStringArray(R.array.rubrics_array);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -218,7 +219,7 @@ public class MainActivity extends FragmentActivity {
             return true;
         }
         // Handle action buttons
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.action_websearch:
                 // create intent to perform web search for this planet
                 Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
@@ -243,21 +244,6 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-    private void selectItem(int position) {
-        // update the main content by replacing fragments
-        Fragment fragment = new PlanetFragment();
-        Bundle args = new Bundle();
-        args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-        fragment.setArguments(args);
-
-//        FragmentManager fragmentManager = getFragmentManager();
-//        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
-        // update selected item and title, then close the drawer
-        mDrawerList.setItemChecked(position, true);
-        setTitle(rubricsTitles[position]);
-        mDrawerLayout.closeDrawer(mDrawerList);
-    }
 
     @Override
     public void setTitle(CharSequence title) {
@@ -287,7 +273,7 @@ public class MainActivity extends FragmentActivity {
     /**
      * Fragment that appears in the "content_frame", shows a planet
      */
-    public static class PlanetFragment extends Fragment {
+/*    public static class PlanetFragment extends Fragment {
         public static final String ARG_PLANET_NUMBER = "rubrics_array";
 
         public PlanetFragment() {
@@ -307,8 +293,18 @@ public class MainActivity extends FragmentActivity {
             getActivity().setTitle(planet);
             return rootView;
         }
+    }*/
+
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(myLog, "onSaveInstanceState");
     }
 
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.d(myLog, "onRestoreInstanceState");
+
+    }
 
 
 }

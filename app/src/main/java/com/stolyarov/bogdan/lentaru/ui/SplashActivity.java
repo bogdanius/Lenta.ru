@@ -9,7 +9,7 @@ import android.view.Window;
 import com.stolyarov.bogdan.lentaru.R;
 
 
-public class FirstActivity extends Activity {
+public class SplashActivity extends Activity {
 
     private static int SPLASH_SCREEN_TIMEOUT = 2500;
 
@@ -24,7 +24,7 @@ public class FirstActivity extends Activity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent intent = new Intent(FirstActivity.this, MainActivity.class);
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                 startActivity(intent);
 //                overridePendingTransition(R.anim.main_activity_start, R.anim.splash_stop);
                 finish();

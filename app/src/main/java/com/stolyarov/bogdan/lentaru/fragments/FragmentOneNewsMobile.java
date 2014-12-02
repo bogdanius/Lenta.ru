@@ -5,17 +5,31 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
+import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
+import com.nostra13.universalimageloader.cache.memory.impl.UsingFreqLimitedMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
+import com.nostra13.universalimageloader.utils.StorageUtils;
 import com.stolyarov.bogdan.lentaru.R;
 import com.stolyarov.bogdan.lentaru.model.Item;
+
+import java.io.File;
 
 /**
  * Created by Bagi on 28.11.2014.
  */
 public class FragmentOneNewsMobile extends Fragment {
 
-    Item item;
+    private Item item;
+    private ImageView imageView;
+    private String url;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -25,17 +39,45 @@ public class FragmentOneNewsMobile extends Fragment {
         TextView title = (TextView) view.findViewById(R.id.one_news_title);
         TextView description = (TextView) view.findViewById(R.id.one_news_description);
         TextView category = (TextView) view.findViewById(R.id.one_news_category);
+        imageView = (ImageView) view.findViewById(R.id.one_news_image);
 
+        url = item.getImageUrl();
         date.setText(item.getPubDate());
         title.setText(item.getTitle());
         description.setText(item.getDescription());
         category.setText(item.getCategory());
-
+        imageLoad();
 
         return view;
     }
 
-    public void setItem(Item item){
+    public void imageLoad() {
+        File cacheDir = StorageUtils.getCacheDirectory(getActivity(), true);
+
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getActivity())
+                .threadPoolSize(5)
+                .threadPriority(Thread.MIN_PRIORITY + 2)
+                .denyCacheImageMultipleSizesInMemory()
+                .memoryCache(new UsingFreqLimitedMemoryCache(2 * 1024 * 1024))
+                .diskCache(new UnlimitedDiscCache(cacheDir))
+                .diskCacheFileNameGenerator(new HashCodeFileNameGenerator())
+                .imageDownloader(new BaseImageDownloader(getActivity()))
+                .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
+                .build();
+
+        DisplayImageOptions options = new DisplayImageOptions.Builder()
+                .cacheOnDisk(true)
+                .cacheInMemory(true)
+                .build();
+
+        ImageLoader imageLoader = ImageLoader.getInstance();
+        imageLoader.init(config);
+        imageLoader.displayImage(url, imageView, options);
+    }
+
+
+    public void setItem(Item item) {
         this.item = item;
     }
+
 }

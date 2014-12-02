@@ -52,5 +52,6 @@
     <string name="first_activity_text">Lenta.ru</string>
     <string name="connection_error">connection_error</string>
     <string name="xml_error">xml_error</string>
+    <string name="get">GET</string>
 
 </resources>
