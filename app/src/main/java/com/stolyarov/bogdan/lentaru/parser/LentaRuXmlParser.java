@@ -1,6 +1,5 @@
 package com.stolyarov.bogdan.lentaru.parser;
 
-import android.util.Log;
 import android.util.Xml;
 
 import com.stolyarov.bogdan.lentaru.model.Item;
@@ -19,7 +18,6 @@ public class LentaRuXmlParser {
 
     // We don't use namespaces
     public static final String ns = null;
-    public static final String myLog = "MyLog";
 
     public ArrayList<Item> parse(InputStream in) throws XmlPullParserException, IOException {
         try {
@@ -36,7 +34,7 @@ public class LentaRuXmlParser {
     private ArrayList<Item> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
         ArrayList<Item> items = new ArrayList<Item>();
         parser.require(XmlPullParser.START_TAG, ns, "rss");
-        parser.next();  // this doing for skip tag "chanel"
+//        parser.next();  // this doing for skip tag "chanel"
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -50,7 +48,6 @@ public class LentaRuXmlParser {
                     if (parser.getEventType() != XmlPullParser.START_TAG) {
                         continue;
                     }
-
                     name = parser.getName();
                     if (name.equals("item")) {
                         items.add(readItem(parser));
@@ -61,11 +58,8 @@ public class LentaRuXmlParser {
             } else {
                 skip(parser);
             }
-
         }
-        Log.d(myLog, "return items from readFeed");
         return items;
-
     }
 
     private Item readItem(XmlPullParser parser) throws XmlPullParserException, IOException {
@@ -184,8 +178,4 @@ public class LentaRuXmlParser {
             }
         }
     }
-
-
-
-
 }

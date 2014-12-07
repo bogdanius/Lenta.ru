@@ -1,7 +1,6 @@
 package com.stolyarov.bogdan.lentaru.db;
 
 import android.content.Context;
-import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
@@ -11,21 +10,27 @@ import android.provider.BaseColumns;
  */
 public class DatabaseHelper extends SQLiteOpenHelper implements BaseColumns {
 
-    private static final String DATABASE_NAME = "newsbase.db";
-    private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_TABLE = "news";
+    public static final String DATABASE_NAME = "newsbase.db";
+    public static final int DATABASE_VERSION = 1;
+    public static final String DATABASE_TABLE = "news";
+    private static DatabaseHelper sInstance;
 
     public static final String TITLE_COLUMN = "title";
     public static final String LINK_COLUMN = "link";
     public static final String PUBDATE_COLUMN = "pubDate";
     public static final String DESCRIPTION_COLUMN = "description";
     public static final String CATEGORY_COLUMN = "category";
+    public static final String IMAGEURL_COLUMN = "imageUrl";
 
     private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE  +
-            " (" + TITLE_COLUMN + " text NOT NULL,"+ LINK_COLUMN +" text NOT NULL," +
-            ""+ PUBDATE_COLUMN +" text NOT NULL,"+ DESCRIPTION_COLUMN +" text NOT NULL," +
-            ""+ CATEGORY_COLUMN +" text NOT NULL)";
+            " (" + TITLE_COLUMN + " VARCHAR(255),"+ LINK_COLUMN +" VARCHAR(255)," +
+            PUBDATE_COLUMN +" VARCHAR(255),"+ DESCRIPTION_COLUMN +" VARCHAR(255)," +
+            CATEGORY_COLUMN +" VARCHAR(255)," +
+            IMAGEURL_COLUMN +" VARCHAR(255)," +
+            DatabaseHelper._ID + " INTEGER PRIMARY KEY AUTOINCREMENT);";
 
+    private static final String DELETE_DATABASE = "DROP TABLE IF EXISTS "
+            + DATABASE_TABLE;
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
@@ -34,15 +39,19 @@ public class DatabaseHelper extends SQLiteOpenHelper implements BaseColumns {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF IT EXIST " + DATABASE_TABLE);
+        sqLiteDatabase.execSQL(DELETE_DATABASE);
         onCreate(sqLiteDatabase);
     }
 
-    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
+    public static DatabaseHelper getInstance(Context context) {
+        if (sInstance == null) {
+            sInstance = new DatabaseHelper(context.getApplicationContext());
+        }
+        return sInstance;
     }
 
-    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
-        super(context, name, factory, version, errorHandler);
+    private DatabaseHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
     }
 }

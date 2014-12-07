@@ -4,22 +4,23 @@ package com.stolyarov.bogdan.lentaru.model;
  * Created by Bagi on 23.11.2014.
  */
 public class Item {
-    private final String title;
-    private final String link;
-    private final String pubDate;
-    private final String description;
-    private final String category;
-    private final String imageUrl;
-
-
+    private  String title;
+    private  String link;
+    private  String pubDate;
+    private  String description;
+    private  String category;
+    private  String imageUrl;
 
     public Item(String title, String pubDate, String link, String description, String category, String imageUrl) {
-        this.title = title;
-        this.pubDate = pubDate;
-        this.link = link;
-        this.description = description;
-        this.category = category;
-        this.imageUrl = imageUrl;
+        setTitle(title);
+        setPubDate(pubDate);
+        setLink(link);
+        setDescription(description);
+        setCategory(category);
+        setImageUrl(imageUrl);
+    }
+
+    public Item() {
     }
 
     public String getTitle() {
@@ -44,6 +45,30 @@ public class Item {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setLink(String link) {
+        this.link = link;
+    }
+
+    public void setPubDate(String pubDate) {
+        this.pubDate = pubDate;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
 

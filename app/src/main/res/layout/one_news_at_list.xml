@@ -44,9 +44,4 @@
         android:textSize="15sp"
         android:layout_gravity="left"/>
 
-    <!--<TextView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="2dp"-->
-        <!--android:background="@android:color/secondary_text_light_nodisable"-->
-       <!--/>-->
 </LinearLayout>

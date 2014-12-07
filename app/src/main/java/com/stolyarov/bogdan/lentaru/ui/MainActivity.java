@@ -1,25 +1,9 @@
-/*
- * Copyright 2013 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.stolyarov.bogdan.lentaru.ui;
 
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -30,19 +14,18 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.stolyarov.bogdan.lentaru.R;
 import com.stolyarov.bogdan.lentaru.adapter.ItemAdapter;
 import com.stolyarov.bogdan.lentaru.asynctasks.DownloadXmlTask;
 import com.stolyarov.bogdan.lentaru.asynctasks.OnNewsLoadedComplete;
+import com.stolyarov.bogdan.lentaru.db.DatabaseHelper;
 import com.stolyarov.bogdan.lentaru.fragments.FragmentOneNewsMobile;
 import com.stolyarov.bogdan.lentaru.fragments.FragmentWithCategorySelected;
 import com.stolyarov.bogdan.lentaru.model.Item;
@@ -55,16 +38,13 @@ public class MainActivity extends FragmentActivity {
     private ListView mDrawerList;
     private ListView newsList;
     private ActionBarDrawerToggle mDrawerToggle;
+    private ProgressBar progressBar;
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
     private String[] rubricsTitles;
-
-    public static final String myLog = "MyLog";
-
     private static boolean isConnect = false;
-
-    public static ArrayList<Item> items;
+    private static ArrayList<Item> items;
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
     private FragmentOneNewsMobile fragmentOneNewsMobile = null;
@@ -72,6 +52,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("MyLog","onCreate");
         setContentView(R.layout.activity_main);
         initNavigationDrawerViews();
         initViews();
@@ -88,25 +69,57 @@ public class MainActivity extends FragmentActivity {
                 fragmentTransaction.commit();
             }
         });
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
         if (isConnect) {
-            loadNews();
+            loadNewsFromInternet();
         } else {
+            loadFromDatabase();
             Toast.makeText(getApplicationContext(), "Check internet connection", Toast.LENGTH_LONG).show();
         }
     }
 
-    private void initViews() {
-        newsList = (ListView) findViewById(R.id.news_list);
-        fragmentOneNewsMobile = new FragmentOneNewsMobile();
+    private void loadFromDatabase() {
+        DatabaseHelper dateBaseHelper = DatabaseHelper.getInstance(this);
+        SQLiteDatabase sqLiteDatabase = dateBaseHelper.getWritableDatabase();
+        ArrayList<Item> loadFromDatabaseItems = new ArrayList<Item>();
+        Item item;
+        Cursor cursor = sqLiteDatabase.query(DatabaseHelper.DATABASE_TABLE, new String[]{
+                        DatabaseHelper._ID,
+                        DatabaseHelper.TITLE_COLUMN,
+                        DatabaseHelper.PUBDATE_COLUMN,
+                        DatabaseHelper.LINK_COLUMN,
+                        DatabaseHelper.DESCRIPTION_COLUMN,
+                        DatabaseHelper.CATEGORY_COLUMN,
+                        DatabaseHelper.IMAGEURL_COLUMN
+                },
+                null, // The columns for the WHERE clause
+                null, // The values for the WHERE clause
+                null, // don't group the rows
+                null, // don't filter by row groups
+                null // The sort order
+        );
+        while (cursor.moveToNext()) {
+            item = new Item();
+            item.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.TITLE_COLUMN)));
+            item.setPubDate(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PUBDATE_COLUMN)));
+            item.setLink(cursor.getString(cursor.getColumnIndex(DatabaseHelper.LINK_COLUMN)));
+            item.setDescription(cursor.getString(cursor.getColumnIndex(DatabaseHelper.DESCRIPTION_COLUMN)));
+            item.setCategory(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CATEGORY_COLUMN)));
+            item.setImageUrl(cursor.getString(cursor.getColumnIndex(DatabaseHelper.IMAGEURL_COLUMN)));
+            loadFromDatabaseItems.add(item);
+        }
+        cursor.close();
+        items = loadFromDatabaseItems;
+        ItemAdapter adapter = new ItemAdapter(MainActivity.this, loadFromDatabaseItems);
+        newsList.setAdapter(adapter);
+        progressBar.setVisibility(View.GONE);
+        sqLiteDatabase.close();
+        dateBaseHelper.close();
     }
 
-    private void initViewsWithCategorySelected() {
-        newsList = (ListView) findViewById(R.id.news_list_with_category_selected);
+    private void initViews() {
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        newsList = (ListView) findViewById(R.id.news_list);
         fragmentOneNewsMobile = new FragmentOneNewsMobile();
     }
 
@@ -123,27 +136,25 @@ public class MainActivity extends FragmentActivity {
         }
     }
 
-
     // Uses AsyncTask to download the XML feed from lenta.ru
-    public void loadNews() {
-        new DownloadXmlTask(this, null, new OnNewsLoadedComplete() {
+    public void loadNewsFromInternet() {
+        new DownloadXmlTask(this, progressBar, new OnNewsLoadedComplete() {
 
             @Override
             public void onNewsLoaded(ArrayList<Item> result) {
                 items = result;
-                ItemAdapter adapter = new ItemAdapter(MainActivity.this, result);
+                ItemAdapter adapter = new ItemAdapter(MainActivity.this, items);
                 newsList.setAdapter(adapter);
             }
         }).execute();
 
     }
 
-    // from NavigationDrawer
-    // update the main content by replacing fragments
+
+    // Update the main content by replacing fragments
     private void selectItem(int position) {
 
         FragmentWithCategorySelected fragmentWithCategorySelected = new FragmentWithCategorySelected();
-
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentWithCategorySelected.setItems(items);
         fragmentWithCategorySelected.setCategory(rubricsTitles[position]);
@@ -175,15 +186,15 @@ public class MainActivity extends FragmentActivity {
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the sliding drawer and the action bar app icon
         mDrawerToggle = new ActionBarDrawerToggle(
-                this,                  /* host Activity */
-                mDrawerLayout,         /* DrawerLayout object */
-                R.drawable.ic_drawer,  /* nav drawer image to replace 'Up' caret */
-                R.string.drawer_open,  /* "open drawer" description for accessibility */
-                R.string.drawer_close  /* "close drawer" description for accessibility */
+                this,
+                mDrawerLayout,
+                R.drawable.ic_drawer,
+                R.string.drawer_open,
+                R.string.drawer_close
         ) {
             public void onDrawerClosed(View view) {
                 getActionBar().setTitle(mTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                invalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
@@ -195,48 +206,8 @@ public class MainActivity extends FragmentActivity {
 
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
 
-    /* Called whenever we call invalidateOptionsMenu() */
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-        menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
-        return super.onPrepareOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // The action bar home/up action should open or close the drawer.
-        // ActionBarDrawerToggle will take care of this.
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        // Handle action buttons
-        switch (item.getItemId()) {
-            case R.id.action_websearch:
-                // create intent to perform web search for this planet
-                Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                intent.putExtra(SearchManager.QUERY, getActionBar().getTitle());
-                // catch event that there's no activity to handle intent
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(this, R.string.app_not_available, Toast.LENGTH_LONG).show();
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    /* The click listner for ListView in the navigation drawer */
+    /* The click listener for ListView in the navigation drawer */
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -251,11 +222,6 @@ public class MainActivity extends FragmentActivity {
         getActionBar().setTitle(mTitle);
     }
 
-    /**
-     * When using the ActionBarDrawerToggle, you must call it during
-     * onPostCreate() and onConfigurationChanged()...
-     */
-
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -269,42 +235,5 @@ public class MainActivity extends FragmentActivity {
         // Pass any configuration change to the drawer toggls
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
-
-    /**
-     * Fragment that appears in the "content_frame", shows a planet
-     */
-/*    public static class PlanetFragment extends Fragment {
-        public static final String ARG_PLANET_NUMBER = "rubrics_array";
-
-        public PlanetFragment() {
-            // Empty constructor required for fragment subclasses
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_planet, container, false);
-            int i = getArguments().getInt(ARG_PLANET_NUMBER);
-            String planet = getResources().getStringArray(R.array.rubrics_array)[i];
-
-            int imageId = getResources().getIdentifier(planet.toLowerCase(Locale.getDefault()),
-                    "drawable", getActivity().getPackageName());
-            ((ImageView) rootView.findViewById(R.id.image)).setImageResource(imageId);
-            getActivity().setTitle(planet);
-            return rootView;
-        }
-    }*/
-
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(myLog, "onSaveInstanceState");
-    }
-
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        Log.d(myLog, "onRestoreInstanceState");
-
-    }
-
 
 }

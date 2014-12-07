@@ -62,18 +62,11 @@ public class FragmentWithCategorySelected extends Fragment {
                 fragmentTransaction.commit();
             }
         });
-
         return view;
     }
-
-
-
-
-
     public void setItems(ArrayList<Item> items) {
         this.items = items;
     }
-
 
     public void setCategory(String category) {
         this.category = category;

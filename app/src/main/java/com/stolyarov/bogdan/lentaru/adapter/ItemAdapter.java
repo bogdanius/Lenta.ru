@@ -1,7 +1,6 @@
 package com.stolyarov.bogdan.lentaru.adapter;
 
 import android.app.Activity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,27 +17,20 @@ import java.util.ArrayList;
  */
 public class ItemAdapter extends BaseAdapter {
 
-
     private final Activity context;
-
     private static ArrayList<Item> items;
-    public static final String myLog = "MyLog";
 
     static class ViewHolder {
         public TextView title;
-//        public String link;
         public TextView category;
         public TextView publicDate;
     }
-
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
 
         ViewHolder viewHolder;
         View newsView = view;
-
-        Log.d(myLog, "GET View");
 
         if (newsView == null) {
             LayoutInflater inflater = context.getLayoutInflater();
@@ -67,7 +59,6 @@ public class ItemAdapter extends BaseAdapter {
             count = items.size();
         }
         return count;
-
     }
 
     @Override

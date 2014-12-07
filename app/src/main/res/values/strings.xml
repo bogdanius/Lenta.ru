@@ -31,7 +31,6 @@
         <item>Культура</item>
         <item>Интернет и СМИ</item>
         <item>Из жизни</item>
-
     </string-array>
 
     <string name="one_news_data">date</string>
@@ -40,8 +39,6 @@
     <string name="one_news_description">Текст статьи, как сюда передать большой обьем текста?</string>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    <string name="action_websearch">Настройки</string>
-    <string name="app_not_available">Sorry, there\'s no web browser available</string>
     <string name="news_title_list">News Title</string>
     <string name="data_list">data</string>
     <string name="description_news_list">description news</string>
