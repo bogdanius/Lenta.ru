@@ -13,7 +13,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,6 +35,7 @@ import com.stolyarov.bogdan.lentaru.fragments.FragmentWithCategorySelected;
 import com.stolyarov.bogdan.lentaru.model.Item;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends FragmentActivity {
 
@@ -98,10 +103,16 @@ public class MainActivity extends FragmentActivity {
                 null, // don't filter by row groups
                 null // The sort order
         );
+        long dateFromDatabase;
+        String pubDate;
         while (cursor.moveToNext()) {
             item = new Item();
             item.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.TITLE_COLUMN)));
-            item.setPubDate(cursor.getString(cursor.getColumnIndex(DatabaseHelper.PUBDATE_COLUMN)));
+
+            dateFromDatabase = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.PUBDATE_COLUMN));
+            pubDate = DateFormat.format("dd MMM yyyy HH:mm", new Date(dateFromDatabase)).toString();
+            item.setPubDate(pubDate);
+
             item.setLink(cursor.getString(cursor.getColumnIndex(DatabaseHelper.LINK_COLUMN)));
             item.setDescription(cursor.getString(cursor.getColumnIndex(DatabaseHelper.DESCRIPTION_COLUMN)));
             item.setCategory(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CATEGORY_COLUMN)));
@@ -203,7 +214,6 @@ public class MainActivity extends FragmentActivity {
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
-
     }
 
 
@@ -235,5 +245,35 @@ public class MainActivity extends FragmentActivity {
         // Pass any configuration change to the drawer toggls
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /* Called whenever we call invalidateOptionsMenu() */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // If the nav drawer is open, hide action items related to the content view
+        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // The action bar home/up action should open or close the drawer.
+        // ActionBarDrawerToggle will take care of this.
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        // Handle action buttons
+        switch(item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
 
 }

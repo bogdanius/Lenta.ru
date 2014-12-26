@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -49,14 +51,27 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
             resultItems = loadXmlFromNetwork(URL);
             ContentValues contentValues;
             databaseHelper.onUpgrade(sqLiteDatabase,1,1);
+            String subString;
+            String pubDate;
+            SimpleDateFormat format = new SimpleDateFormat("EEE',' dd MMM yyyy HH:mm:ss");
+            int dateInt = 0;
             for (int i = 0; i < resultItems.size(); i++) {
                 contentValues = new ContentValues();
                 contentValues.put(DatabaseHelper.CATEGORY_COLUMN, resultItems.get(i).getCategory());
                 contentValues.put(DatabaseHelper.DESCRIPTION_COLUMN, resultItems.get(i).getDescription());
                 contentValues.put(DatabaseHelper.LINK_COLUMN, resultItems.get(i).getLink());
-                contentValues.put(DatabaseHelper.PUBDATE_COLUMN, resultItems.get(i).getPubDate());
                 contentValues.put(DatabaseHelper.TITLE_COLUMN, resultItems.get(i).getTitle());
                 contentValues.put(DatabaseHelper.IMAGEURL_COLUMN, resultItems.get(i).getImageUrl());
+
+                pubDate = resultItems.get(i).getPubDate();
+                subString = pubDate.substring(0, pubDate.length() - 6);
+                try {
+                    dateInt = (int) format.parse(subString).getTime();
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                contentValues.put(DatabaseHelper.PUBDATE_COLUMN, dateInt );
+
                 sqLiteDatabase.insert(DatabaseHelper.DATABASE_TABLE, DatabaseHelper.IMAGEURL_COLUMN, contentValues);
             }
         }

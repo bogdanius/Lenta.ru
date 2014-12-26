@@ -24,7 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper implements BaseColumns {
 
     private static final String DATABASE_CREATE = "CREATE TABLE " + DATABASE_TABLE  +
             " (" + TITLE_COLUMN + " VARCHAR(255),"+ LINK_COLUMN +" VARCHAR(255)," +
-            PUBDATE_COLUMN +" VARCHAR(255),"+ DESCRIPTION_COLUMN +" VARCHAR(255)," +
+            PUBDATE_COLUMN +" INTEGER,"+ DESCRIPTION_COLUMN +" VARCHAR(255)," +
             CATEGORY_COLUMN +" VARCHAR(255)," +
             IMAGEURL_COLUMN +" VARCHAR(255)," +
             DatabaseHelper._ID + " INTEGER PRIMARY KEY AUTOINCREMENT);";
