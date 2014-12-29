@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +34,6 @@ import com.stolyarov.bogdan.lentaru.fragments.FragmentWithCategorySelected;
 import com.stolyarov.bogdan.lentaru.model.Item;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class MainActivity extends FragmentActivity {
 
@@ -44,6 +42,7 @@ public class MainActivity extends FragmentActivity {
     private ListView newsList;
     private ActionBarDrawerToggle mDrawerToggle;
     private ProgressBar progressBar;
+    private ArrayList<Item> loadFromDatabaseItems;
 
     private CharSequence mDrawerTitle;
     private CharSequence mTitle;
@@ -54,9 +53,12 @@ public class MainActivity extends FragmentActivity {
     private FragmentTransaction fragmentTransaction;
     private FragmentOneNewsMobile fragmentOneNewsMobile = null;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         Log.d("MyLog","onCreate");
         setContentView(R.layout.activity_main);
         initNavigationDrawerViews();
@@ -76,7 +78,7 @@ public class MainActivity extends FragmentActivity {
         });
 
         if (isConnect) {
-            loadNewsFromInternet();
+            updateAndDisplayNews();
         } else {
             loadFromDatabase();
             Toast.makeText(getApplicationContext(), "Check internet connection", Toast.LENGTH_LONG).show();
@@ -86,7 +88,7 @@ public class MainActivity extends FragmentActivity {
     private void loadFromDatabase() {
         DatabaseHelper dateBaseHelper = DatabaseHelper.getInstance(this);
         SQLiteDatabase sqLiteDatabase = dateBaseHelper.getWritableDatabase();
-        ArrayList<Item> loadFromDatabaseItems = new ArrayList<Item>();
+        loadFromDatabaseItems = new ArrayList<Item>();
         Item item;
         Cursor cursor = sqLiteDatabase.query(DatabaseHelper.DATABASE_TABLE, new String[]{
                         DatabaseHelper._ID,
@@ -103,16 +105,10 @@ public class MainActivity extends FragmentActivity {
                 null, // don't filter by row groups
                 null // The sort order
         );
-        long dateFromDatabase;
-        String pubDate;
         while (cursor.moveToNext()) {
             item = new Item();
             item.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.TITLE_COLUMN)));
-
-            dateFromDatabase = cursor.getInt(cursor.getColumnIndex(DatabaseHelper.PUBDATE_COLUMN));
-            pubDate = DateFormat.format("dd MMM yyyy HH:mm", new Date(dateFromDatabase)).toString();
-            item.setPubDate(pubDate);
-
+            item.setPubDate(cursor.getInt(cursor.getColumnIndex(DatabaseHelper.PUBDATE_COLUMN)));
             item.setLink(cursor.getString(cursor.getColumnIndex(DatabaseHelper.LINK_COLUMN)));
             item.setDescription(cursor.getString(cursor.getColumnIndex(DatabaseHelper.DESCRIPTION_COLUMN)));
             item.setCategory(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CATEGORY_COLUMN)));
@@ -120,9 +116,14 @@ public class MainActivity extends FragmentActivity {
             loadFromDatabaseItems.add(item);
         }
         cursor.close();
-        items = loadFromDatabaseItems;
-        ItemAdapter adapter = new ItemAdapter(MainActivity.this, loadFromDatabaseItems);
+
+        for (int i = 1; i < loadFromDatabaseItems.size() + 1; i++){
+            items.add(loadFromDatabaseItems.get(loadFromDatabaseItems.size()-i));
+        }
+
+        ItemAdapter adapter = new ItemAdapter(MainActivity.this, items);
         newsList.setAdapter(adapter);
+
         progressBar.setVisibility(View.GONE);
         sqLiteDatabase.close();
         dateBaseHelper.close();
@@ -148,7 +149,7 @@ public class MainActivity extends FragmentActivity {
     }
 
     // Uses AsyncTask to download the XML feed from lenta.ru
-    public void loadNewsFromInternet() {
+    public void updateAndDisplayNews() {
         new DownloadXmlTask(this, progressBar, new OnNewsLoadedComplete() {
 
             @Override

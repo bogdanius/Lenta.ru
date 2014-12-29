@@ -1,6 +1,7 @@
 package com.stolyarov.bogdan.lentaru.adapter;
 
 import android.app.Activity;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import com.stolyarov.bogdan.lentaru.R;
 import com.stolyarov.bogdan.lentaru.model.Item;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Bagi on 11.11.2014.
@@ -31,6 +33,8 @@ public class ItemAdapter extends BaseAdapter {
 
         ViewHolder viewHolder;
         View newsView = view;
+        String pubDate;
+
 
         if (newsView == null) {
             LayoutInflater inflater = context.getLayoutInflater();
@@ -47,7 +51,8 @@ public class ItemAdapter extends BaseAdapter {
             Item item = items.get(i);
             viewHolder.title.setText(item.getTitle());
             viewHolder.category.setText(item.getCategory());
-            viewHolder.publicDate.setText(item.getPubDate());
+            pubDate = DateFormat.format("dd MMM yyyy kk:mm", new Date(item.getPubDate())).toString();
+            viewHolder.publicDate.setText(pubDate);
         }
         return newsView;
     }

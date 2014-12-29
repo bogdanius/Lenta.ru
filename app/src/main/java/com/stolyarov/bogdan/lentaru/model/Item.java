@@ -6,12 +6,12 @@ package com.stolyarov.bogdan.lentaru.model;
 public class Item {
     private  String title;
     private  String link;
-    private  String pubDate;
+    private  long pubDate;
     private  String description;
     private  String category;
     private  String imageUrl;
 
-    public Item(String title, String pubDate, String link, String description, String category, String imageUrl) {
+    public Item(String title, long pubDate, String link, String description, String category, String imageUrl) {
         setTitle(title);
         setPubDate(pubDate);
         setLink(link);
@@ -31,7 +31,7 @@ public class Item {
         return link;
     }
 
-    public String getPubDate() {
+    public long getPubDate() {
         return pubDate;
     }
 
@@ -55,7 +55,7 @@ public class Item {
         this.link = link;
     }
 
-    public void setPubDate(String pubDate) {
+    public void setPubDate(long pubDate) {
         this.pubDate = pubDate;
     }
 

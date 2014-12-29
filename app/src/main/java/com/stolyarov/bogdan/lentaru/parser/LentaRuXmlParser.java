@@ -9,7 +9,10 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Bagi on 12.11.2014.
@@ -34,7 +37,6 @@ public class LentaRuXmlParser {
     private ArrayList<Item> readFeed(XmlPullParser parser) throws XmlPullParserException, IOException {
         ArrayList<Item> items = new ArrayList<Item>();
         parser.require(XmlPullParser.START_TAG, ns, "rss");
-//        parser.next();  // this doing for skip tag "chanel"
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -65,7 +67,7 @@ public class LentaRuXmlParser {
     private Item readItem(XmlPullParser parser) throws XmlPullParserException, IOException {
         parser.require(XmlPullParser.START_TAG, LentaRuXmlParser.ns, "item");
         String title = null;
-        String pubDate = null;
+        long pubDate = 0;
         String link = null;
         String description = null;
         String category = null;
@@ -116,11 +118,20 @@ public class LentaRuXmlParser {
     }
 
     // Processes publication date tags in the feed.
-    private String readPubDate(XmlPullParser parser) throws IOException, XmlPullParserException {
+    private long readPubDate(XmlPullParser parser) throws IOException, XmlPullParserException {
         parser.require(XmlPullParser.START_TAG, LentaRuXmlParser.ns, "pubDate");
-        String pubDate = readText(parser);
+        Date date = null;
+        String stringDate = readText(parser);
+        String sub = stringDate.substring(5,stringDate.length()-6);
+        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.ENGLISH);
+        try {
+            date = format.parse(sub);
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
+        long dateInLong = date.getTime();
         parser.require(XmlPullParser.END_TAG, LentaRuXmlParser.ns, "pubDate");
-        return pubDate;
+        return dateInLong;
     }
 
     // Processes description tags in the feed.

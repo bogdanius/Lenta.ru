@@ -2,6 +2,7 @@ package com.stolyarov.bogdan.lentaru.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.stolyarov.bogdan.lentaru.R;
 import com.stolyarov.bogdan.lentaru.model.Item;
+
+import java.util.Date;
 
 /**
  * Created by Bagi on 28.11.2014.
@@ -38,7 +41,8 @@ public class FragmentOneNewsMobile extends Fragment {
         imageView = (ImageView) view.findViewById(R.id.one_news_image);
 
         url = item.getImageUrl();
-        date.setText(item.getPubDate());
+        String dateString = DateFormat.format("dd MMM yyyy kk:mm", new Date(item.getPubDate())).toString();
+        date.setText(dateString);
         title.setText(item.getTitle());
         description.setText(item.getDescription());
         category.setText(item.getCategory());
