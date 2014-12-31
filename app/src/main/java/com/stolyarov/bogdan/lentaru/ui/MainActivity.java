@@ -1,6 +1,7 @@
 package com.stolyarov.bogdan.lentaru.ui;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,10 +11,8 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -25,11 +24,10 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.stolyarov.bogdan.lentaru.R;
-import com.stolyarov.bogdan.lentaru.adapter.ItemAdapter;
 import com.stolyarov.bogdan.lentaru.asynctasks.DownloadXmlTask;
 import com.stolyarov.bogdan.lentaru.asynctasks.OnNewsLoadedComplete;
 import com.stolyarov.bogdan.lentaru.db.DatabaseHelper;
-import com.stolyarov.bogdan.lentaru.fragments.FragmentOneNewsMobile;
+import com.stolyarov.bogdan.lentaru.fragments.FragmentWithAllCategory;
 import com.stolyarov.bogdan.lentaru.fragments.FragmentWithCategorySelected;
 import com.stolyarov.bogdan.lentaru.model.Item;
 
@@ -39,7 +37,6 @@ public class MainActivity extends FragmentActivity {
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    private ListView newsList;
     private ActionBarDrawerToggle mDrawerToggle;
     private ProgressBar progressBar;
     private ArrayList<Item> loadFromDatabaseItems;
@@ -49,33 +46,17 @@ public class MainActivity extends FragmentActivity {
     private String[] rubricsTitles;
     private static boolean isConnect = false;
     private static ArrayList<Item> items;
-    private FragmentManager fragmentManager;
-    private FragmentTransaction fragmentTransaction;
-    private FragmentOneNewsMobile fragmentOneNewsMobile = null;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Log.d("MyLog","onCreate");
+        if(getResources().getBoolean(R.bool.portrait_only)){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
         setContentView(R.layout.activity_main);
         initNavigationDrawerViews();
         initViews();
-
         updateConnectedFlags();
-        newsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View itemClicked, int position, long id) {
-                fragmentManager = getSupportFragmentManager();
-                fragmentOneNewsMobile.setItem(items.get(position));
-                fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.add(R.id.container, fragmentOneNewsMobile);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-            }
-        });
 
         if (isConnect) {
             updateAndDisplayNews();
@@ -116,13 +97,15 @@ public class MainActivity extends FragmentActivity {
             loadFromDatabaseItems.add(item);
         }
         cursor.close();
-
+        items = new ArrayList<Item>();
         for (int i = 1; i < loadFromDatabaseItems.size() + 1; i++){
             items.add(loadFromDatabaseItems.get(loadFromDatabaseItems.size()-i));
         }
 
-        ItemAdapter adapter = new ItemAdapter(MainActivity.this, items);
-        newsList.setAdapter(adapter);
+        FragmentWithAllCategory fragmentWithAllCategory = new FragmentWithAllCategory();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentWithAllCategory.setItems(items);
+        fragmentManager.beginTransaction().replace(R.id.container_for_list, fragmentWithAllCategory).commit();
 
         progressBar.setVisibility(View.GONE);
         sqLiteDatabase.close();
@@ -131,8 +114,6 @@ public class MainActivity extends FragmentActivity {
 
     private void initViews() {
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        newsList = (ListView) findViewById(R.id.news_list);
-        fragmentOneNewsMobile = new FragmentOneNewsMobile();
     }
 
     // Checks the network connection
@@ -155,8 +136,11 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onNewsLoaded(ArrayList<Item> result) {
                 items = result;
-                ItemAdapter adapter = new ItemAdapter(MainActivity.this, items);
-                newsList.setAdapter(adapter);
+
+                FragmentWithAllCategory fragmentWithAllCategory = new FragmentWithAllCategory();
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                fragmentWithAllCategory.setItems(items);
+                fragmentManager.beginTransaction().replace(R.id.container_for_list, fragmentWithAllCategory).commit();
             }
         }).execute();
 
@@ -170,7 +154,7 @@ public class MainActivity extends FragmentActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentWithCategorySelected.setItems(items);
         fragmentWithCategorySelected.setCategory(rubricsTitles[position]);
-        fragmentManager.beginTransaction().add(R.id.container, fragmentWithCategorySelected).commit();
+        fragmentManager.beginTransaction().replace(R.id.container_for_list, fragmentWithCategorySelected).commit();
 
         // update selected item and title, then close the drawer
         mDrawerList.setItemChecked(position, true);

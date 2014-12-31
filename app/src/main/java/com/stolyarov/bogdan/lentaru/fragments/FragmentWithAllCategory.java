@@ -20,39 +20,27 @@ import java.util.ArrayList;
  * Created by Bagi on 02.12.2014.
  */
 
-public class FragmentWithCategorySelected extends Fragment {
+public class FragmentWithAllCategory extends Fragment {
 
     private ArrayList<Item> items;
-    private ArrayList<Item> categoryItems;
-    private String category;
     private ListView newsList;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_category_selected, container, false);
-        newsList = (ListView) view.findViewById(R.id.news_list_with_category_selected);
-        categoryItems = new ArrayList<Item>();
-        if (!category.equals("Все новости")) {
-            int j = 0;
-            for (int i = 0; i < items.size(); i++) {
-                if (category.equals(items.get(i).getCategory())) {
+        View view = inflater.inflate(R.layout.fragment_all_category, container, false);
+        newsList = (ListView) view.findViewById(R.id.news_list_with_all_category);
 
-                    categoryItems.add(items.get(i));
-                    j++;
-                }
-            }
-        } else {
-            categoryItems = items;
-        }
-        ItemAdapter adapter = new ItemAdapter(getActivity(), categoryItems);
+
+        ItemAdapter adapter = new ItemAdapter(getActivity(), items);
         newsList.setAdapter(adapter);
 
         newsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+
                 FragmentManager fragmentManager = getFragmentManager();
                 FragmentOneNewsMobile fragmentOneNewsMobile = new FragmentOneNewsMobile();
-                fragmentOneNewsMobile.setItem(categoryItems.get(position));
+                fragmentOneNewsMobile.setItem(items.get(position));
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 if (getResources().getBoolean(R.bool.portrait_only)) {
                     fragmentTransaction.replace(R.id.container_for_list, fragmentOneNewsMobile);
@@ -61,16 +49,12 @@ public class FragmentWithCategorySelected extends Fragment {
                 }
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
-
             }
         });
         return view;
     }
+
     public void setItems(ArrayList<Item> items) {
         this.items = items;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 }

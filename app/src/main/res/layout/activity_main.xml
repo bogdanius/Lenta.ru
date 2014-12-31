@@ -7,19 +7,24 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/container">
+        android:id="@+id/container_for_list">
 
-        <ListView
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/news_list">
-        </ListView>
+            android:layout_height="match_parent"
+            android:id="@+id/container">
 
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:id="@+id/progress_bar"/>
+            <ListView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/news_list"></ListView>
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/progress_bar" />
+        </FrameLayout>
     </FrameLayout>
 
     <ListView
@@ -31,6 +36,7 @@
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
         android:background="#111" />
+
 
 </android.support.v4.widget.DrawerLayout>
 
