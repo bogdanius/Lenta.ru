@@ -46,11 +46,12 @@ public class MainActivity extends FragmentActivity {
     private String[] rubricsTitles;
     private static boolean isConnect = false;
     private static ArrayList<Item> items;
+    private static boolean loadFinish = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(getResources().getBoolean(R.bool.portrait_only)){
+        if (getResources().getBoolean(R.bool.portrait_only)) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }
         setContentView(R.layout.activity_main);
@@ -98,8 +99,8 @@ public class MainActivity extends FragmentActivity {
         }
         cursor.close();
         items = new ArrayList<Item>();
-        for (int i = 1; i < loadFromDatabaseItems.size() + 1; i++){
-            items.add(loadFromDatabaseItems.get(loadFromDatabaseItems.size()-i));
+        for (int i = 1; i < loadFromDatabaseItems.size() + 1; i++) {
+            items.add(loadFromDatabaseItems.get(loadFromDatabaseItems.size() - i));
         }
 
         FragmentWithAllCategory fragmentWithAllCategory = new FragmentWithAllCategory();
@@ -108,6 +109,7 @@ public class MainActivity extends FragmentActivity {
         fragmentManager.beginTransaction().replace(R.id.container_for_list, fragmentWithAllCategory).commit();
 
         progressBar.setVisibility(View.GONE);
+        loadFinish = true;
         sqLiteDatabase.close();
         dateBaseHelper.close();
     }
@@ -141,8 +143,10 @@ public class MainActivity extends FragmentActivity {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 fragmentWithAllCategory.setItems(items);
                 fragmentManager.beginTransaction().replace(R.id.container_for_list, fragmentWithAllCategory).commit();
+                loadFinish = true;
             }
         }).execute();
+
 
     }
 
@@ -206,7 +210,13 @@ public class MainActivity extends FragmentActivity {
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
+            if (loadFinish) {
+                selectItem(position);
+            } else {
+                Toast.makeText(getApplicationContext(),"Подождите пока загрузится контент",
+                        Toast.LENGTH_SHORT).show();
+            }
+
         }
     }
 
@@ -254,7 +264,7 @@ public class MainActivity extends FragmentActivity {
             return true;
         }
         // Handle action buttons
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             default:
                 return super.onOptionsItemSelected(item);
         }
