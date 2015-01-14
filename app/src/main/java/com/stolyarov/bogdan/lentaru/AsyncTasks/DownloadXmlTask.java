@@ -73,13 +73,10 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
 
             //check for first start app
             if (!(timeLastUpdate == 0)) {
-                Log.d("MyLog", String.valueOf(timeLastUpdate));
-
                 ContentValues contentValues;
 
                 //check numbers new news
                 while (timeLastUpdate < (int) resultItems.get(counterNewItems).getPubDate()) {
-                    Log.d("MyLog", String.valueOf((int) resultItems.get(counterNewItems).getPubDate()));
                     counterNewItems++;
                     contentValues = new ContentValues();
                     contentValues.put(DatabaseHelper.CATEGORY_COLUMN, resultItems.get(resultItems.size() - counterNewItems).getCategory());
@@ -89,6 +86,9 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
                     contentValues.put(DatabaseHelper.IMAGEURL_COLUMN, resultItems.get(resultItems.size() - counterNewItems).getImageUrl());
                     contentValues.put(DatabaseHelper.PUBDATE_COLUMN, resultItems.get(resultItems.size() - counterNewItems).getPubDate());
                     sqLiteDatabase.insert(DatabaseHelper.DATABASE_TABLE, DatabaseHelper.IMAGEURL_COLUMN, contentValues);
+                    if (counterNewItems == 200) {
+                        break;
+                    }
                 }
                 afterUpdate = firstNumberInDB + counterNewItems;
                 sqLiteDatabase.delete(DatabaseHelper.DATABASE_TABLE, DatabaseHelper._ID + " < " + afterUpdate, null);
@@ -108,7 +108,7 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
                     contentValues.put(DatabaseHelper.PUBDATE_COLUMN, resultItems.get(numberItems - i).getPubDate());
                     sqLiteDatabase.insert(DatabaseHelper.DATABASE_TABLE, DatabaseHelper.IMAGEURL_COLUMN, contentValues);
                 }
-            }
+        }
         } catch (XmlPullParserException e) {
             e.printStackTrace();
         } catch (IOException e) {

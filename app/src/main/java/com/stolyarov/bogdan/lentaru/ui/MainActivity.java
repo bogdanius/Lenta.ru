@@ -58,7 +58,6 @@ public class MainActivity extends FragmentActivity {
         initNavigationDrawerViews();
         initViews();
         updateConnectedFlags();
-
         if (isConnect) {
             updateAndDisplayNews();
         } else {
@@ -146,8 +145,6 @@ public class MainActivity extends FragmentActivity {
                 loadFinish = true;
             }
         }).execute();
-
-
     }
 
 

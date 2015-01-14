@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
 import com.stolyarov.bogdan.lentaru.R;
 import com.stolyarov.bogdan.lentaru.adapter.ItemAdapter;
 import com.stolyarov.bogdan.lentaru.model.Item;
@@ -32,7 +33,9 @@ public class FragmentWithAllCategory extends Fragment {
 
 
         ItemAdapter adapter = new ItemAdapter(getActivity(), items);
-        newsList.setAdapter(adapter);
+        AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(adapter);
+        alphaInAnimationAdapter.setAbsListView(newsList);
+        newsList.setAdapter(alphaInAnimationAdapter);
 
         newsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
