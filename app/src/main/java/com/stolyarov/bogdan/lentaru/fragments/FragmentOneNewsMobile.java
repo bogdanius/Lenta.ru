@@ -56,10 +56,11 @@ public class FragmentOneNewsMobile extends Fragment {
                 .threadPoolSize(5)
                 .threadPriority(Thread.MIN_PRIORITY + 2)
                 .denyCacheImageMultipleSizesInMemory()
-                .memoryCache(new UsingFreqLimitedMemoryCache(2 * 1024 * 1024))
+                .memoryCache(new UsingFreqLimitedMemoryCache(5 * 1024 * 1024))
                 .diskCacheFileNameGenerator(new HashCodeFileNameGenerator())
                 .imageDownloader(new BaseImageDownloader(getActivity()))
                 .defaultDisplayImageOptions(DisplayImageOptions.createSimple())
+                .diskCacheFileCount(200)
                 .build();
 
         DisplayImageOptions options = new DisplayImageOptions.Builder()

@@ -89,7 +89,7 @@ public class MainActivity extends FragmentActivity {
         while (cursor.moveToNext()) {
             item = new Item();
             item.setTitle(cursor.getString(cursor.getColumnIndex(DatabaseHelper.TITLE_COLUMN)));
-            item.setPubDate(cursor.getInt(cursor.getColumnIndex(DatabaseHelper.PUBDATE_COLUMN)));
+            item.setPubDate(cursor.getLong(cursor.getColumnIndex(DatabaseHelper.PUBDATE_COLUMN)));
             item.setLink(cursor.getString(cursor.getColumnIndex(DatabaseHelper.LINK_COLUMN)));
             item.setDescription(cursor.getString(cursor.getColumnIndex(DatabaseHelper.DESCRIPTION_COLUMN)));
             item.setCategory(cursor.getString(cursor.getColumnIndex(DatabaseHelper.CATEGORY_COLUMN)));

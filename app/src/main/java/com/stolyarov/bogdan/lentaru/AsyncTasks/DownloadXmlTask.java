@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.view.View;
 
 import com.stolyarov.bogdan.lentaru.R;
@@ -37,8 +36,8 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
     private Context context;
     private ArrayList<Item> resultItems;
     private static final String URL = "http://lenta.ru/rss/";
-    SharedPreferences sharedPreferencesTimeLastUpdate;
-    SharedPreferences sharedPreferencesFirstNumbersOfItemsInDB;
+    private SharedPreferences sharedPreferencesTimeLastUpdate;
+    private SharedPreferences sharedPreferencesFirstNumbersOfItemsInDB;
     private int afterUpdate;
 
     public DownloadXmlTask(Context c, View v, OnNewsLoadedComplete l) {
@@ -76,7 +75,7 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
                 ContentValues contentValues;
 
                 //check numbers new news
-                while (timeLastUpdate < (int) resultItems.get(counterNewItems).getPubDate()) {
+                while (counterNewItems != 200 && timeLastUpdate < (int) resultItems.get(counterNewItems).getPubDate()) {
                     counterNewItems++;
                     contentValues = new ContentValues();
                     contentValues.put(DatabaseHelper.CATEGORY_COLUMN, resultItems.get(resultItems.size() - counterNewItems).getCategory());
@@ -86,15 +85,12 @@ public class DownloadXmlTask extends AsyncTask<String, Void, ArrayList<Item>> {
                     contentValues.put(DatabaseHelper.IMAGEURL_COLUMN, resultItems.get(resultItems.size() - counterNewItems).getImageUrl());
                     contentValues.put(DatabaseHelper.PUBDATE_COLUMN, resultItems.get(resultItems.size() - counterNewItems).getPubDate());
                     sqLiteDatabase.insert(DatabaseHelper.DATABASE_TABLE, DatabaseHelper.IMAGEURL_COLUMN, contentValues);
-                    if (counterNewItems == 200) {
-                        break;
-                    }
+
                 }
                 afterUpdate = firstNumberInDB + counterNewItems;
                 sqLiteDatabase.delete(DatabaseHelper.DATABASE_TABLE, DatabaseHelper._ID + " < " + afterUpdate, null);
-                //else this first start, then create DB
+            //else this first start, then create DB
             } else {
-                Log.d("MyLog", "Программа запускается первый раз, DB нет");
                 ContentValues contentValues;
                 databaseHelper.onUpgrade(sqLiteDatabase, 1, 1);
                 int numberItems = resultItems.size();
